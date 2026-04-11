@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Node
+node_modules/
+.next/
+
+# Environment
+.env
+.env.local
+backend/.env
+frontend/.env.local
+
+# Data
+backend/data/chroma_db/
+backend/data/sync_state.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Firebase
+*-service-account.json
+
+# Superpowers
+.superpowers/

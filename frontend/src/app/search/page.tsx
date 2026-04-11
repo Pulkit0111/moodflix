@@ -1,12 +1,12 @@
 "use client";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import SearchBar from "@/components/SearchBar";
 import MovieCard from "@/components/MovieCard";
 import AuthGate from "@/components/AuthGate";
 import { useSearch } from "@/hooks/useSearch";
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const { results, loading, error, performSearch } = useSearch();
@@ -30,5 +30,13 @@ export default function SearchPage() {
         {!loading && !error && query && results.length === 0 && <div className="text-center py-20"><p className="text-gray-400 text-lg">No matches found. Try describing your mood differently.</p></div>}
       </div>
     </AuthGate>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]"><div className="animate-pulse text-gray-400">Loading...</div></div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
