@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import browse, search
+from app.routers import browse, detail, search, admin, user
 
 app = FastAPI(title="MoodFlix API", version="0.1.0")
 
@@ -22,3 +22,6 @@ async def health():
 
 app.include_router(browse.router)
 app.include_router(search.router)
+app.include_router(detail.router)
+app.include_router(user.router)
+app.include_router(admin.router)
