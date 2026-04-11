@@ -1,9 +1,16 @@
+import asyncio
+import logging
+
 import httpx
+
+logger = logging.getLogger(__name__)
+
 
 class TMDBService:
     def __init__(self, api_key: str, base_url: str = "https://api.themoviedb.org/3"):
         self.api_key = api_key
         self.base_url = base_url
+        self._client: httpx.AsyncClient | None = None
 
     def _headers(self) -> dict:
         return {
@@ -11,15 +18,29 @@ class TMDBService:
             "accept": "application/json",
         }
 
-    async def _get(self, path: str, params: dict | None = None) -> dict:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{self.base_url}{path}",
-                headers=self._headers(),
-                params=params or {},
+    async def _get_client(self) -> httpx.AsyncClient:
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(
+                headers=self._headers(), timeout=httpx.Timeout(30.0)
             )
-            response.raise_for_status()
-            return response.json()
+        return self._client
+
+    async def _get(self, path: str, params: dict | None = None, retries: int = 2) -> dict:
+        client = await self._get_client()
+        for attempt in range(retries + 1):
+            try:
+                response = await client.get(
+                    f"{self.base_url}{path}",
+                    params=params or {},
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.ConnectError:
+                if attempt < retries:
+                    logger.warning("TMDB connect error on %s, retrying (%d/%d)", path, attempt + 1, retries)
+                    await asyncio.sleep(0.5)
+                else:
+                    raise
 
     async def get_trending(self, page: int = 1) -> list[dict]:
         data = await self._get("/trending/all/week", params={"language": "en-US", "page": page})

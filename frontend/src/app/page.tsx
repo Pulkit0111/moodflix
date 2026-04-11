@@ -13,10 +13,10 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [trendingData, moviesData, tvData] = await Promise.all([getTrending(), getTopRated("movie"), getTopRated("tv")]);
-        setTrending(trendingData);
-        setTopMovies(moviesData);
-        setTopTV(tvData);
+        const [trendingRes, moviesRes, tvRes] = await Promise.allSettled([getTrending(), getTopRated("movie"), getTopRated("tv")]);
+        if (trendingRes.status === "fulfilled") setTrending(trendingRes.value);
+        if (moviesRes.status === "fulfilled") setTopMovies(moviesRes.value);
+        if (tvRes.status === "fulfilled") setTopTV(tvRes.value);
       } catch (error) { console.error("Failed to fetch browse data:", error); }
       finally { setLoading(false); }
     }

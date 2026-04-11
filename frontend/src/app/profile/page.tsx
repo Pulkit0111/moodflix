@@ -16,8 +16,11 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [wl, hist, prefs, searches] = await Promise.all([getWatchlist(), getHistory(), getPreferences(), getSearchHistory()]);
-        setWatchlist(wl); setHistory(hist); setPreferences(prefs); setSearchHistory(searches);
+        const [wlRes, histRes, prefsRes, searchRes] = await Promise.allSettled([getWatchlist(), getHistory(), getPreferences(), getSearchHistory()]);
+        if (wlRes.status === "fulfilled") setWatchlist(wlRes.value);
+        if (histRes.status === "fulfilled") setHistory(histRes.value);
+        if (prefsRes.status === "fulfilled") setPreferences(prefsRes.value);
+        if (searchRes.status === "fulfilled") setSearchHistory(searchRes.value);
       } catch (error) { console.error("Failed to fetch profile data:", error); }
       finally { setLoading(false); }
     }

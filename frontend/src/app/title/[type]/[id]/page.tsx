@@ -19,9 +19,9 @@ export default function DetailPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [detailData, similarData] = await Promise.all([getDetails(mediaType, tmdbId), getSimilar(mediaType, tmdbId).catch(() => [])]);
-        setDetail(detailData);
-        setSimilar(similarData);
+        const [detailRes, similarRes] = await Promise.allSettled([getDetails(mediaType, tmdbId), getSimilar(mediaType, tmdbId)]);
+        if (detailRes.status === "fulfilled") setDetail(detailRes.value);
+        if (similarRes.status === "fulfilled") setSimilar(similarRes.value);
       } catch (error) { console.error("Failed to fetch details:", error); }
       finally { setLoading(false); }
     }

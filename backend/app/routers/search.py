@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends
 from app.dependencies import verify_firebase_token, get_chroma_collection
 from app.models.search import SearchRequest, SearchResponse, SearchResult
@@ -6,6 +8,7 @@ from app.services.user_service import UserService
 from app.services.embedding_service import EmbeddingService
 from app.config import settings
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["search"])
 
 def get_search_service() -> SearchService:
@@ -22,8 +25,12 @@ def get_user_service() -> UserService:
     return UserService(db=db)
 
 def _build_user_context(user_service: UserService, uid: str) -> str:
-    prefs = user_service.get_preferences(uid)
-    history = user_service.get_history(uid)
+    try:
+        prefs = user_service.get_preferences(uid)
+        history = user_service.get_history(uid)
+    except Exception as e:
+        logger.warning("Failed to fetch user context from Firestore: %s", e)
+        return ""
     parts = []
     if prefs.get("favorite_genres"):
         parts.append(f"Likes: {', '.join(prefs['favorite_genres'])}")
@@ -43,5 +50,8 @@ async def search(
 ):
     user_context = _build_user_context(user_service, user["uid"])
     results = await search_service.search(request.query, user_context)
-    user_service.add_search_query(user["uid"], request.query)
+    try:
+        user_service.add_search_query(user["uid"], request.query)
+    except Exception as e:
+        logger.warning("Failed to save search query to Firestore: %s", e)
     return SearchResponse(query=request.query, results=[SearchResult(**r) for r in results])

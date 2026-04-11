@@ -3,16 +3,31 @@ import type { SearchResponse, Genre, WatchlistItem, HistoryItem, UserPreferences
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-async function apiFetch(path: string, options: RequestInit = {}) {
+async function apiFetch(path: string, options: RequestInit = {}, retries = 1) {
   const token = await getIdToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...((options.headers as Record<string, string>) || {}),
   };
   if (token) { headers["Authorization"] = `Bearer ${token}`; }
-  const response = await fetch(`${API_URL}${path}`, { ...options, headers });
-  if (!response.ok) { throw new Error(`API error: ${response.status} ${response.statusText}`); }
-  return response.json();
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(`${API_URL}${path}`, { ...options, headers });
+      if (response.status === 502 && attempt < retries) {
+        await new Promise(r => setTimeout(r, 800));
+        continue;
+      }
+      if (!response.ok) { throw new Error(`API error: ${response.status} ${response.statusText}`); }
+      return response.json();
+    } catch (error) {
+      if (attempt < retries && error instanceof TypeError) {
+        await new Promise(r => setTimeout(r, 800));
+        continue;
+      }
+      throw error;
+    }
+  }
 }
 
 export async function search(query: string): Promise<SearchResponse> {
@@ -22,7 +37,7 @@ export async function getTrending(page: number = 1) { return apiFetch(`/api/tren
 export async function getTopRated(mediaType: string = "movie", page: number = 1) { return apiFetch(`/api/top-rated?media_type=${mediaType}&page=${page}`); }
 export async function getGenres(mediaType: string = "movie"): Promise<Genre[]> { return apiFetch(`/api/genres?media_type=${mediaType}`); }
 export async function browse(genreId: number, mediaType: string = "movie", page: number = 1) { return apiFetch(`/api/browse?genre=${genreId}&media_type=${mediaType}&page=${page}`); }
-export async function getDetails(mediaType: string, tmdbId: number) { return apiFetch(`/api/title/${mediaType}/${tmdbId}`); }
+export async function getDetails(mediaType: string, tmdbId: number) { return apiFetch(`/api/title/${mediaType}/${tmdbId}`, {}, 2); }
 export async function getSimilar(mediaType: string, tmdbId: number) { return apiFetch(`/api/title/${mediaType}/${tmdbId}/similar`); }
 export async function getProfile() { return apiFetch("/api/user/profile"); }
 export async function getWatchlist(): Promise<WatchlistItem[]> { return apiFetch("/api/user/watchlist"); }

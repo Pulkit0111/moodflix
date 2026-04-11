@@ -1,8 +1,13 @@
-from fastapi import APIRouter, Depends
+import logging
+
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
+
 from app.services.tmdb_service import TMDBService
 from app.dependencies import get_chroma_collection
 from app.config import settings
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["detail"])
 
 def get_tmdb_service() -> TMDBService:
@@ -36,7 +41,11 @@ def get_similar_from_chroma(media_type: str, tmdb_id: int, n: int = 10) -> list[
 
 @router.get("/title/{media_type}/{tmdb_id}")
 async def get_details(media_type: str, tmdb_id: int, tmdb: TMDBService = Depends(get_tmdb_service)):
-    return await tmdb.get_details(media_type, tmdb_id)
+    try:
+        return await tmdb.get_details(media_type, tmdb_id)
+    except (httpx.HTTPStatusError, httpx.ConnectError) as e:
+        logger.error("TMDB API error on /title/%s/%s: %s", media_type, tmdb_id, e)
+        raise HTTPException(status_code=502, detail="Failed to fetch title details from TMDB")
 
 @router.get("/title/{media_type}/{tmdb_id}/similar")
 async def get_similar(media_type: str, tmdb_id: int):
