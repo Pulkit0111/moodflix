@@ -1,5 +1,8 @@
 import chromadb
 from chromadb.api.models.Collection import Collection
+from fastapi import Header, HTTPException
+from firebase_admin import auth as firebase_auth
+import firebase_admin
 
 _chroma_client: chromadb.ClientAPI | None = None
 _collection: Collection | None = None
@@ -27,3 +30,24 @@ def get_chroma_collection(persist_dir: str | None = None) -> Collection:
         _collection = collection
 
     return collection
+
+
+_firebase_initialized = False
+
+def init_firebase():
+    global _firebase_initialized
+    if not _firebase_initialized:
+        from app.config import settings
+        cred = firebase_admin.credentials.Certificate(settings.firebase_service_account_path)
+        firebase_admin.initialize_app(cred)
+        _firebase_initialized = True
+
+async def verify_firebase_token(authorization: str | None = Header(default=None)) -> dict:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
+    token = authorization.split("Bearer ")[1]
+    try:
+        decoded = firebase_auth.verify_id_token(token)
+        return decoded
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
