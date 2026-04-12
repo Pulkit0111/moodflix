@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import AuthGate from "@/components/AuthGate";
 import MovieCard from "@/components/MovieCard";
 import TasteDNA from "@/components/TasteDNA";
-import { getWatchlist, getHistory, getPreferences, getSearchHistory, removeFromWatchlist, getTasteDNA } from "@/lib/api";
+import { getWatchlist, getHistory, getPreferences, getSearchHistory, removeFromWatchlist, addToHistory, getTasteDNA } from "@/lib/api";
+import { useToast } from "@/contexts/ToastContext";
 import type { WatchlistItem, HistoryItem, UserPreferences, TasteDNA as TasteDNAType } from "@/types";
 
 export default function ProfilePage() {
@@ -14,6 +15,7 @@ export default function ProfilePage() {
   const [tasteDna, setTasteDna] = useState<TasteDNAType | null>(null);
   const [activeTab, setActiveTab] = useState<"watchlist" | "history" | "searches">("watchlist");
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
   useEffect(() => {
     async function fetchData() {
@@ -33,8 +35,31 @@ export default function ProfilePage() {
   }, []);
 
   const handleRemoveFromWatchlist = async (tmdbId: number) => {
-    await removeFromWatchlist(tmdbId);
-    setWatchlist((prev) => prev.filter((item) => item.tmdb_id !== tmdbId));
+    try {
+      await removeFromWatchlist(tmdbId);
+      setWatchlist((prev) => prev.filter((item) => item.tmdb_id !== tmdbId));
+      showToast("Removed from watchlist");
+    } catch { showToast("Failed to remove from watchlist"); }
+  };
+
+  const handleMarkWatched = async (item: WatchlistItem) => {
+    try {
+      await addToHistory(item.tmdb_id, item.media_type, item.title);
+      await removeFromWatchlist(item.tmdb_id);
+      setWatchlist((prev) => prev.filter((w) => w.tmdb_id !== item.tmdb_id));
+      setHistory((prev) => [{ tmdb_id: item.tmdb_id, media_type: item.media_type, title: item.title, watched_at: new Date().toISOString() }, ...prev]);
+      showToast("Moved to watched");
+    } catch { showToast("Failed to mark as watched"); }
+  };
+
+  const handleRemoveFromHistory = (tmdbId: number) => {
+    setHistory((prev) => prev.filter((item) => item.tmdb_id !== tmdbId));
+    showToast("Removed from history");
+  };
+
+  const handleClearSearchHistory = () => {
+    setSearchHistory([]);
+    showToast("Search history cleared");
   };
 
   const tabs = [
@@ -76,8 +101,12 @@ export default function ProfilePage() {
                 {watchlist.map((item) => (
                   <div key={item.tmdb_id} className="relative group">
                     <MovieCard tmdbId={item.tmdb_id} mediaType={item.media_type} title={item.title} posterPath={item.poster_path} />
-                    <button onClick={(e) => { e.preventDefault(); handleRemoveFromWatchlist(item.tmdb_id); }}
-                      className="absolute top-2 right-2 bg-black/70 text-[#888] hover:text-white w-6 h-6 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">&times;</button>
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={(e) => { e.preventDefault(); handleMarkWatched(item); }}
+                        className="bg-black/70 text-[#888] hover:text-white text-[10px] px-2 py-1 rounded-full">Watched</button>
+                      <button onClick={(e) => { e.preventDefault(); handleRemoveFromWatchlist(item.tmdb_id); }}
+                        className="bg-black/70 text-[#888] hover:text-white w-6 h-6 rounded-full text-xs flex items-center justify-center">&times;</button>
+                    </div>
                   </div>
                 ))}
                 {watchlist.length === 0 && <p className="text-[#555] col-span-full text-center py-10 text-sm font-light">Your watchlist is empty</p>}
@@ -86,20 +115,32 @@ export default function ProfilePage() {
             {activeTab === "history" && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {history.map((item) => (
-                  <div key={item.tmdb_id}><MovieCard tmdbId={item.tmdb_id} mediaType={item.media_type} title={item.title} posterPath={null} />{item.rating && <p className="text-[#888] text-xs mt-1">Rated: {item.rating}/5</p>}</div>
+                  <div key={item.tmdb_id} className="relative group">
+                    <MovieCard tmdbId={item.tmdb_id} mediaType={item.media_type} title={item.title} posterPath={null} />
+                    {item.rating && <p className="text-[#888] text-xs mt-1">Rated: {item.rating}/5</p>}
+                    <button onClick={(e) => { e.preventDefault(); handleRemoveFromHistory(item.tmdb_id); }}
+                      className="absolute top-2 right-2 bg-black/70 text-[#888] hover:text-white w-6 h-6 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">&times;</button>
+                  </div>
                 ))}
                 {history.length === 0 && <p className="text-[#555] col-span-full text-center py-10 text-sm font-light">No watch history yet</p>}
               </div>
             )}
             {activeTab === "searches" && (
-              <div className="space-y-2">
-                {searchHistory.map((item: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 border border-[#1a1a1a] rounded-lg">
-                    <span className="text-sm text-[#a0a0a0] font-light">{item.query}</span>
-                    <span className="text-[#444] text-xs">{new Date(item.searched_at).toLocaleDateString()}</span>
+              <div>
+                {searchHistory.length > 0 && (
+                  <div className="flex justify-end mb-4">
+                    <button onClick={handleClearSearchHistory} className="text-xs text-[#666] hover:text-white border border-[#222] px-3 py-1.5 rounded-full transition-colors">Clear Search History</button>
                   </div>
-                ))}
-                {searchHistory.length === 0 && <p className="text-[#555] text-center py-10 text-sm font-light">No search history yet</p>}
+                )}
+                <div className="space-y-2">
+                  {searchHistory.map((item: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-3 border border-[#1a1a1a] rounded-lg">
+                      <span className="text-sm text-[#a0a0a0] font-light">{item.query}</span>
+                      <span className="text-[#444] text-xs">{new Date(item.searched_at).toLocaleDateString()}</span>
+                    </div>
+                  ))}
+                  {searchHistory.length === 0 && <p className="text-[#555] text-center py-10 text-sm font-light">No search history yet</p>}
+                </div>
               </div>
             )}
           </>

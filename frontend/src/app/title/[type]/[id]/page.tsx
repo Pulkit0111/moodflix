@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { getDetails, getSimilar, addToWatchlist, addToHistory, getPitch } from "@/lib/api";
 import Carousel from "@/components/Carousel";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/contexts/ToastContext";
 
 const IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE || "https://image.tmdb.org/t/p";
 
@@ -12,6 +13,7 @@ export default function DetailPage() {
   const mediaType = params.type as string;
   const tmdbId = parseInt(params.id as string);
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [detail, setDetail] = useState<any>(null);
   const [similar, setSimilar] = useState<any[]>([]);
   const [pitch, setPitch] = useState("");
@@ -73,8 +75,8 @@ export default function DetailPage() {
               )}
               {user && (
                 <div className="flex gap-3">
-                  <button onClick={() => addToWatchlist(tmdbId, mediaType, title, detail.poster_path)} className="text-sm text-white border border-[#333] px-5 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">+ Watchlist</button>
-                  <button onClick={() => addToHistory(tmdbId, mediaType, title)} className="text-sm text-[#888] border border-[#222] px-5 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">Watched</button>
+                  <button onClick={async () => { try { await addToWatchlist(tmdbId, mediaType, title, detail.poster_path); showToast("Added to watchlist"); } catch { showToast("Failed to add to watchlist"); } }} className="text-sm text-white border border-[#333] px-5 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">+ Watchlist</button>
+                  <button onClick={async () => { try { await addToHistory(tmdbId, mediaType, title); showToast("Marked as watched"); } catch { showToast("Failed to mark as watched"); } }} className="text-sm text-[#888] border border-[#222] px-5 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">Watched</button>
                 </div>
               )}
             </div>

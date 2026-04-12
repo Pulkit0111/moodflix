@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ChatProvider } from "@/contexts/ChatContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 import ChatPanel from "@/components/ChatPanel";
 
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600"] });
@@ -17,9 +18,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-[#0a0a0a] text-white min-h-screen antialiased`}>
         <ChatProvider>
-          <Navbar />
-          <main className="pt-16">{children}</main>
-          <ChatPanel />
+          <ToastProvider>
+            <Navbar />
+            <main className="pt-16">{children}</main>
+            <ChatPanel />
+          </ToastProvider>
         </ChatProvider>
       </body>
     </html>

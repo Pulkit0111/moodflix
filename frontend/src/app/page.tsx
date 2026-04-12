@@ -4,6 +4,7 @@ import SearchBar from "@/components/SearchBar";
 import MoodPills from "@/components/MoodPills";
 import Carousel from "@/components/Carousel";
 import PlaylistCard from "@/components/PlaylistCard";
+import SkeletonCard from "@/components/SkeletonCard";
 import { getTrending, getTopRated, getPlaylists } from "@/lib/api";
 import { useChat } from "@/contexts/ChatContext";
 import type { MoodPlaylist } from "@/types";
@@ -54,8 +55,15 @@ export default function Home() {
       {/* Content */}
       <section className="pb-12">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-pulse text-[#444]">Loading...</div>
+          <div className="py-4">
+            {Array.from({ length: 3 }).map((_, s) => (
+              <div key={s} className="mb-10">
+                <div className="h-3 bg-[#161616] rounded w-32 mb-4 mx-6 animate-pulse" />
+                <div className="flex gap-5 px-6">
+                  {Array.from({ length: 7 }).map((_, i) => <SkeletonCard key={i} />)}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <>

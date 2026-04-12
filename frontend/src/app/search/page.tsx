@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useCallback, useState } from "react";
+import { Suspense, useEffect, useCallback, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import SearchBar from "@/components/SearchBar";
 import SmartFilter from "@/components/SmartFilter";
@@ -13,12 +13,15 @@ function SearchContent() {
   const { results, loading, error, performSearch } = useSearch();
   const [filterText, setFilterText] = useState("");
 
-  useEffect(() => { if (query) performSearch(query); }, [query]);
+  const queryRef = useRef(query);
+  queryRef.current = query;
+
+  useEffect(() => { if (query) performSearch(query); }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFilter = useCallback((text: string) => {
     setFilterText(text);
-    if (query) performSearch(query, text);
-  }, [query, performSearch]);
+    if (queryRef.current) performSearch(queryRef.current, text);
+  }, [performSearch]);
 
   return (
     <AuthGate>
