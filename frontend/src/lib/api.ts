@@ -71,8 +71,8 @@ export async function removeFromWatchlist(tmdbId: number) {
   return res;
 }
 export async function getHistory(): Promise<HistoryItem[]> { return apiFetch("/api/user/history"); }
-export async function addToHistory(tmdbId: number, mediaType: string, title: string, rating?: number) {
-  const res = await apiFetch("/api/user/history", { method: "POST", body: JSON.stringify({ tmdb_id: tmdbId, media_type: mediaType, title, rating }) });
+export async function addToHistory(tmdbId: number, mediaType: string, title: string, posterPath?: string | null, rating?: number) {
+  const res = await apiFetch("/api/user/history", { method: "POST", body: JSON.stringify({ tmdb_id: tmdbId, media_type: mediaType, title, poster_path: posterPath || null, rating }) });
   cache.delete("/api/user/history");
   return res;
 }

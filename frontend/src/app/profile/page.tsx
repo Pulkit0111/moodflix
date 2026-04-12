@@ -44,10 +44,10 @@ export default function ProfilePage() {
 
   const handleMarkWatched = async (item: WatchlistItem) => {
     try {
-      await addToHistory(item.tmdb_id, item.media_type, item.title);
+      await addToHistory(item.tmdb_id, item.media_type, item.title, item.poster_path);
       await removeFromWatchlist(item.tmdb_id);
       setWatchlist((prev) => prev.filter((w) => w.tmdb_id !== item.tmdb_id));
-      setHistory((prev) => [{ tmdb_id: item.tmdb_id, media_type: item.media_type, title: item.title, watched_at: new Date().toISOString() }, ...prev]);
+      setHistory((prev) => [{ tmdb_id: item.tmdb_id, media_type: item.media_type, title: item.title, poster_path: item.poster_path, watched_at: new Date().toISOString(), rating: null }, ...prev]);
       showToast("Moved to watched");
     } catch { showToast("Failed to mark as watched"); }
   };
@@ -128,7 +128,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {history.map((item) => (
                   <div key={item.tmdb_id} className="relative group">
-                    <MovieCard tmdbId={item.tmdb_id} mediaType={item.media_type} title={item.title} posterPath={null} />
+                    <MovieCard tmdbId={item.tmdb_id} mediaType={item.media_type} title={item.title} posterPath={item.poster_path} />
                     {item.rating && <p className="text-[#888] text-xs mt-1">Rated: {item.rating}/5</p>}
                     <div className="absolute bottom-[40%] left-0 right-0 z-20 flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
                       <button onClick={(e) => { e.preventDefault(); handleRemoveFromHistory(item.tmdb_id); }}

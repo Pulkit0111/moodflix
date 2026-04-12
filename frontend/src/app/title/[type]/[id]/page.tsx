@@ -85,7 +85,7 @@ export default function DetailPage() {
               {user && (
                 <div className="flex gap-3">
                   <button onClick={async () => { try { await addToWatchlist(tmdbId, mediaType, title, detail.poster_path); showToast("Added to watchlist"); } catch { showToast("Failed to add to watchlist"); } }} className="text-sm text-white border border-[#333] px-5 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">+ Watchlist</button>
-                  <button onClick={async () => { try { await addToHistory(tmdbId, mediaType, title); showToast("Marked as watched"); } catch { showToast("Failed to mark as watched"); } }} className="text-sm text-[#888] border border-[#222] px-5 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">Watched</button>
+                  <button onClick={async () => { try { await addToHistory(tmdbId, mediaType, title, detail.poster_path); showToast("Marked as watched"); } catch { showToast("Failed to mark as watched"); } }} className="text-sm text-[#888] border border-[#222] px-5 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">Watched</button>
                 </div>
               )}
             </div>

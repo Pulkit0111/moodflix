@@ -36,10 +36,10 @@ class UserService:
         docs = self._users_ref(uid).collection("watch_history").order_by("watched_at").stream()
         return [doc.to_dict() for doc in docs]
 
-    def add_to_history(self, uid: str, tmdb_id: int, media_type: str, title: str, rating: float | None = None):
+    def add_to_history(self, uid: str, tmdb_id: int, media_type: str, title: str, poster_path: str | None = None, rating: float | None = None):
         self._users_ref(uid).collection("watch_history").document(str(tmdb_id)).set({
             "tmdb_id": tmdb_id, "media_type": media_type, "title": title,
-            "watched_at": datetime.now(timezone.utc).isoformat(), "rating": rating,
+            "poster_path": poster_path, "watched_at": datetime.now(timezone.utc).isoformat(), "rating": rating,
         })
 
     def get_preferences(self, uid: str) -> dict:

@@ -34,6 +34,7 @@ export interface HistoryItem {
   tmdb_id: number;
   media_type: string;
   title: string;
+  poster_path: string | null;
   watched_at: string;
   rating: number | null;
 }

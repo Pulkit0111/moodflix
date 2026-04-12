@@ -59,7 +59,7 @@ async def get_history(user: dict = Depends(verify_firebase_token), user_service:
 @router.post("/history")
 async def add_to_history(item: HistoryAdd, user: dict = Depends(verify_firebase_token), user_service: UserService = Depends(get_user_service)):
     try:
-        user_service.add_to_history(uid=user["uid"], tmdb_id=item.tmdb_id, media_type=item.media_type, title=item.title, rating=item.rating)
+        user_service.add_to_history(uid=user["uid"], tmdb_id=item.tmdb_id, media_type=item.media_type, title=item.title, poster_path=item.poster_path, rating=item.rating)
         return {"status": "added"}
     except PermissionDenied:
         raise HTTPException(status_code=503, detail=FIRESTORE_UNAVAILABLE)

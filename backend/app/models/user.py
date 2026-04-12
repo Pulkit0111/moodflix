@@ -22,6 +22,7 @@ class HistoryItem(BaseModel):
     tmdb_id: int
     media_type: str
     title: str
+    poster_path: str | None = None
     watched_at: str | None = None
     rating: float | None = None
 
@@ -35,4 +36,5 @@ class HistoryAdd(BaseModel):
     tmdb_id: int
     media_type: str
     title: str
+    poster_path: str | None = None
     rating: float | None = None
