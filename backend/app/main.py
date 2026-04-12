@@ -4,7 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.routers import search, browse, detail, user, admin
+from app.routers import search, browse, detail, user, admin, playlist, chat, pitch, taste
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,6 +42,10 @@ app.include_router(browse.router)
 app.include_router(detail.router)
 app.include_router(user.router)
 app.include_router(admin.router)
+app.include_router(playlist.router)
+app.include_router(chat.router)
+app.include_router(pitch.router)
+app.include_router(taste.router)
 
 @app.get("/api/health")
 async def health():
