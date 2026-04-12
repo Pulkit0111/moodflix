@@ -61,10 +61,14 @@ class TMDBService:
         )
         return data
 
-    async def discover(self, media_type: str, genre_id: int | None = None, page: int = 1) -> tuple[list[dict], int]:
+    async def discover(self, media_type: str, genre_id: int | None = None, page: int = 1, language: str | None = None, original_language: str | None = None) -> tuple[list[dict], int]:
         params = {"language": "en-US", "sort_by": "popularity.desc", "page": page}
         if genre_id:
             params["with_genres"] = genre_id
+        if original_language:
+            params["with_original_language"] = original_language
+        if language:
+            params["language"] = language
         data = await self._get(f"/discover/{media_type}", params=params)
         return data["results"], data["total_pages"]
 
