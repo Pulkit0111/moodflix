@@ -52,7 +52,3 @@ curl -X POST http://localhost:8000/api/admin/sync/run \
 ```
 
 This will fetch popular movies/TV shows from TMDB and generate embeddings. The app is usable once the first batch completes.
-
-## Architecture
-
-See `docs/superpowers/specs/2026-04-10-moodflix-design.md` for the full design spec.
