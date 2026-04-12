@@ -24,10 +24,8 @@ For each item, return ONLY tags from the vocabulary above.
 Items:
 {items}
 
-Return a JSON array where each element has "id" and "tags" (list of strings). Example:
-[{{"id": "movie_123", "tags": ["dark", "intense", "suspenseful"]}}]
-
-Return ONLY the JSON array."""
+Return a JSON object with a "results" key containing an array. Each element has "id" and "tags".
+Example: {{"results": [{{"id": "movie_123", "tags": ["dark", "intense", "suspenseful"]}}]}}"""
 
 
 def build_embedding_text_from_tmdb(item: dict, genre_map: dict[int, str], keywords: list[str], cast: list[str]) -> str:
