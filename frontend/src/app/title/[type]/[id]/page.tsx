@@ -60,8 +60,8 @@ export default function DetailPage() {
               </div>
               {user && (
                 <div className="flex gap-3">
-                  <button onClick={() => addToWatchlist(tmdbId, mediaType, title, detail.poster_path)} className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-medium transition-colors">+ Watchlist</button>
-                  <button onClick={() => addToHistory(tmdbId, mediaType, title)} className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded-lg font-medium transition-colors">Watched</button>
+                  <button onClick={() => addToWatchlist(tmdbId, mediaType, title, detail.poster_path)} className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-5 py-2 rounded-lg font-medium transition-all active:scale-95">+ Watchlist</button>
+                  <button onClick={() => addToHistory(tmdbId, mediaType, title)} className="bg-gray-700 hover:bg-gray-600 active:bg-gray-800 text-white px-5 py-2 rounded-lg font-medium transition-all active:scale-95">Watched</button>
                 </div>
               )}
             </div>

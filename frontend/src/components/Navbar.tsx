@@ -19,7 +19,7 @@ export default function Navbar() {
                   {user.photoURL && <img src={user.photoURL} alt={user.displayName || "User"} className="w-8 h-8 rounded-full" />}
                 </>
               ) : (
-                <button onClick={() => signInWithGoogle()} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Sign In with Google</button>
+                <button onClick={() => signInWithGoogle()} className="bg-red-600 hover:bg-red-700 active:bg-red-800 active:scale-95 text-white px-4 py-2 rounded-md text-sm font-medium transition-all">Sign In with Google</button>
               )}
             </>
           )}

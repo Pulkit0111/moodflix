@@ -36,7 +36,10 @@ class SearchService:
     async def retrieve_candidates(self, query: str, n: int | None = None) -> list[dict]:
         n = n or self.candidate_count
         query_embedding = await self.embedding_service.embed_text(query)
-        results = self.collection.query(query_embeddings=[query_embedding], n_results=min(n, self.collection.count()))
+        count = self.collection.count()
+        if count == 0:
+            return []
+        results = self.collection.query(query_embeddings=[query_embedding], n_results=min(n, count))
         candidates = []
         if results["ids"] and results["ids"][0]:
             for i, doc_id in enumerate(results["ids"][0]):
