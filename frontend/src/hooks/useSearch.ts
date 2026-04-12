@@ -11,7 +11,13 @@ export function useSearch() {
   async function performSearch(query: string, filterText?: string) {
     if (!query.trim()) return;
     setLoading(true); setError(null);
-    try { const data = await apiSearch(query, filterText); setResults(data.results); }
+    try {
+      const data = await apiSearch(query, filterText);
+      // Deduplicate by tmdb_id
+      const seen = new Set<number>();
+      const unique = data.results.filter((r) => { if (seen.has(r.tmdb_id)) return false; seen.add(r.tmdb_id); return true; });
+      setResults(unique);
+    }
     catch (err) { setError(err instanceof Error ? err.message : "Search failed"); setResults([]); }
     finally { setLoading(false); }
   }

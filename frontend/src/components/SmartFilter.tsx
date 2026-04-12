@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface SmartFilterProps {
   onFilter: (filterText: string) => void;
@@ -15,13 +15,21 @@ const SUGGESTIONS = [
 
 export default function SmartFilter({ onFilter }: SmartFilterProps) {
   const [text, setText] = useState("");
+  const onFilterRef = useRef(onFilter);
+  onFilterRef.current = onFilter;
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    // Skip firing on mount with empty text
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     const timeout = setTimeout(() => {
-      onFilter(text);
+      onFilterRef.current(text);
     }, 600);
     return () => clearTimeout(timeout);
-  }, [text, onFilter]);
+  }, [text]);
 
   return (
     <div className="mb-6">

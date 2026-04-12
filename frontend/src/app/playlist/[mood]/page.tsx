@@ -41,7 +41,7 @@ export default function PlaylistPage() {
       <p className="text-sm text-[#666] font-light mb-8">{playlist.description}</p>
       {playlist.items.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-          {playlist.items.map((item) => (
+          {playlist.items.filter((item, i, arr) => arr.findIndex((a) => a.tmdb_id === item.tmdb_id) === i).map((item) => (
             <MovieCard
               key={`${item.media_type}-${item.tmdb_id}`}
               tmdbId={item.tmdb_id}
