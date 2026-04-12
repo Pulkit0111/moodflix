@@ -8,10 +8,10 @@ export function useSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function performSearch(query: string) {
+  async function performSearch(query: string, filterText?: string) {
     if (!query.trim()) return;
     setLoading(true); setError(null);
-    try { const data = await apiSearch(query); setResults(data.results); }
+    try { const data = await apiSearch(query, filterText); setResults(data.results); }
     catch (err) { setError(err instanceof Error ? err.message : "Search failed"); setResults([]); }
     finally { setLoading(false); }
   }

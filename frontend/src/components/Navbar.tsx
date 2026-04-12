@@ -2,24 +2,28 @@
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { signInWithGoogle, signOut } from "@/lib/firebase";
+import { useChat } from "@/contexts/ChatContext";
 
 export default function Navbar() {
   const { user, loading } = useAuth();
+  const { openChat } = useChat();
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
-        <Link href="/" className="text-2xl font-bold text-red-500">MoodFlix</Link>
-        <div className="flex items-center gap-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-[#1a1a1a]">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+        <Link href="/" className="text-lg font-light tracking-[0.25em] text-white">MOODFLIX</Link>
+        <div className="flex items-center gap-6">
           {!loading && (
             <>
               {user ? (
                 <>
-                  <Link href="/profile" className="text-gray-300 hover:text-white transition-colors">My Profile</Link>
-                  <button onClick={() => signOut()} className="text-gray-400 hover:text-white text-sm transition-colors">Sign Out</button>
-                  {user.photoURL && <img src={user.photoURL} alt={user.displayName || "User"} className="w-8 h-8 rounded-full" />}
+                  <Link href="/" className="text-sm text-[#a0a0a0] hover:text-white transition-colors">Discover</Link>
+                  <Link href="/profile" className="text-sm text-[#a0a0a0] hover:text-white transition-colors">My List</Link>
+                  <button onClick={openChat} className="text-sm text-[#a0a0a0] hover:text-white transition-colors border border-[#2a2a2a] px-3 py-1.5 rounded-full hover:border-[#444]">AI Chat</button>
+                  <button onClick={() => signOut()} className="text-xs text-[#666] hover:text-white transition-colors">Sign Out</button>
+                  {user.photoURL && <img src={user.photoURL} alt={user.displayName || "User"} className="w-7 h-7 rounded-full opacity-80 hover:opacity-100 transition-opacity" />}
                 </>
               ) : (
-                <button onClick={() => signInWithGoogle()} className="bg-red-600 hover:bg-red-700 active:bg-red-800 active:scale-95 text-white px-4 py-2 rounded-md text-sm font-medium transition-all">Sign In with Google</button>
+                <button onClick={() => signInWithGoogle()} className="text-sm text-white border border-[#333] px-4 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">Sign In</button>
               )}
             </>
           )}

@@ -1,5 +1,5 @@
 import { getIdToken } from "./firebase";
-import type { SearchResponse, Genre, WatchlistItem, HistoryItem, UserPreferences } from "@/types";
+import type { SearchResponse, Genre, WatchlistItem, HistoryItem, UserPreferences, MoodPlaylist, TasteDNA, ChatMessage } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -42,15 +42,22 @@ async function apiFetch(path: string, options: RequestInit = {}, retries = 1) {
   }
 }
 
-export async function search(query: string): Promise<SearchResponse> {
-  return apiFetch("/api/search", { method: "POST", body: JSON.stringify({ query }) });
+// Search
+export async function search(query: string, filterText?: string): Promise<SearchResponse> {
+  return apiFetch("/api/search", { method: "POST", body: JSON.stringify({ query, filter_text: filterText || null }) });
 }
+
+// Browse
 export async function getTrending(page: number = 1) { return apiFetch(`/api/trending?page=${page}`); }
 export async function getTopRated(mediaType: string = "movie", page: number = 1) { return apiFetch(`/api/top-rated?media_type=${mediaType}&page=${page}`); }
 export async function getGenres(mediaType: string = "movie"): Promise<Genre[]> { return apiFetch(`/api/genres?media_type=${mediaType}`); }
 export async function browse(genreId: number, mediaType: string = "movie", page: number = 1) { return apiFetch(`/api/browse?genre=${genreId}&media_type=${mediaType}&page=${page}`); }
+
+// Detail
 export async function getDetails(mediaType: string, tmdbId: number) { return apiFetch(`/api/title/${mediaType}/${tmdbId}`, {}, 2); }
 export async function getSimilar(mediaType: string, tmdbId: number) { return apiFetch(`/api/title/${mediaType}/${tmdbId}/similar`); }
+
+// User
 export async function getProfile() { return apiFetch("/api/user/profile"); }
 export async function getWatchlist(): Promise<WatchlistItem[]> { return apiFetch("/api/user/watchlist"); }
 export async function addToWatchlist(tmdbId: number, mediaType: string, title: string, posterPath: string | null) {
@@ -72,3 +79,31 @@ export async function addToHistory(tmdbId: number, mediaType: string, title: str
 export async function getPreferences(): Promise<UserPreferences> { return apiFetch("/api/user/preferences"); }
 export async function updatePreferences(prefs: UserPreferences) { return apiFetch("/api/user/preferences", { method: "PUT", body: JSON.stringify(prefs) }); }
 export async function getSearchHistory() { return apiFetch("/api/user/search-history"); }
+
+// Playlists
+export async function getPlaylists(): Promise<MoodPlaylist[]> { return apiFetch("/api/playlists"); }
+export async function getPlaylist(moodKey: string): Promise<MoodPlaylist> { return apiFetch(`/api/playlists/${moodKey}`); }
+
+// Pitch
+export async function getPitch(mediaType: string, tmdbId: number): Promise<{ pitch: string }> { return apiFetch(`/api/pitch/${mediaType}/${tmdbId}`); }
+export async function getBatchPitches(items: { tmdb_id: number; media_type: string }[]): Promise<{ pitches: Record<string, string> }> {
+  return apiFetch("/api/pitches", { method: "POST", body: JSON.stringify({ items }) });
+}
+
+// Taste DNA
+export async function getTasteDNA(): Promise<TasteDNA & { status?: string }> { return apiFetch("/api/user/taste-dna"); }
+
+// Chat (streaming)
+export async function streamChat(messages: ChatMessage[]): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+  const token = await getIdToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const response = await fetch(`${API_URL}/api/chat`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ messages }),
+  });
+  if (!response.ok) throw new Error(`Chat error: ${response.status}`);
+  return response.body!.getReader();
+}

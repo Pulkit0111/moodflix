@@ -22,9 +22,9 @@ export default function SearchBar({ initialQuery = "", large = false }: SearchBa
     <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
       <div className="relative">
         <input type="text" value={query} onChange={(e) => setQuery(e.target.value)}
-          placeholder="What are you in the mood for?"
-          className={`w-full bg-gray-800 border border-gray-700 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent placeholder-gray-500 ${large ? "px-8 py-5 text-xl" : "px-6 py-3 text-base"}`} />
-        <button type="submit" className={`absolute right-2 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 active:bg-red-800 active:scale-95 text-white rounded-full font-medium transition-all ${large ? "px-6 py-3 text-lg" : "px-4 py-2 text-sm"}`}>Search</button>
+          placeholder="Describe a feeling, a scene, or what you want to watch..."
+          className={`w-full bg-[#111] border border-[#222] text-white rounded-full focus:outline-none focus:border-[#444] placeholder-[#555] transition-colors ${large ? "px-8 py-5 text-lg font-light" : "px-6 py-3 text-sm"}`} />
+        <button type="submit" className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white text-black rounded-full font-medium transition-all hover:bg-gray-200 active:scale-95 ${large ? "px-6 py-2.5 text-sm" : "px-4 py-1.5 text-xs"}`}>Search</button>
       </div>
     </form>
   );

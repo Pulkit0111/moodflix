@@ -1,22 +1,31 @@
 "use client";
 import { useState, useEffect } from "react";
 import SearchBar from "@/components/SearchBar";
+import MoodPills from "@/components/MoodPills";
 import Carousel from "@/components/Carousel";
-import { getTrending, getTopRated } from "@/lib/api";
+import PlaylistCard from "@/components/PlaylistCard";
+import { getTrending, getTopRated, getPlaylists } from "@/lib/api";
+import { useChat } from "@/contexts/ChatContext";
+import type { MoodPlaylist } from "@/types";
 
 export default function Home() {
   const [trending, setTrending] = useState<any[]>([]);
   const [topMovies, setTopMovies] = useState<any[]>([]);
   const [topTV, setTopTV] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<MoodPlaylist[]>([]);
   const [loading, setLoading] = useState(true);
+  const { openChat } = useChat();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [trendingRes, moviesRes, tvRes] = await Promise.allSettled([getTrending(), getTopRated("movie"), getTopRated("tv")]);
+        const [trendingRes, moviesRes, tvRes, playlistRes] = await Promise.allSettled([
+          getTrending(), getTopRated("movie"), getTopRated("tv"), getPlaylists(),
+        ]);
         if (trendingRes.status === "fulfilled") setTrending(trendingRes.value);
         if (moviesRes.status === "fulfilled") setTopMovies(moviesRes.value);
         if (tvRes.status === "fulfilled") setTopTV(tvRes.value);
+        if (playlistRes.status === "fulfilled") setPlaylists(playlistRes.value);
       } catch (error) { console.error("Failed to fetch browse data:", error); }
       finally { setLoading(false); }
     }
@@ -25,19 +34,46 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <section className="flex flex-col items-center justify-center px-4 py-24 bg-gradient-to-b from-gray-900 to-gray-950">
-        <h1 className="text-5xl font-bold text-white mb-4 text-center">What are you in the <span className="text-red-500">mood</span> for?</h1>
-        <p className="text-gray-400 text-lg mb-8 text-center max-w-xl">Describe how you feel or what you want to watch, and we will find the perfect movie or show for you.</p>
+      {/* Hero */}
+      <section className="flex flex-col items-center justify-center px-6 pt-28 pb-16">
+        <h1 className="text-4xl md:text-5xl font-extralight text-white mb-3 text-center tracking-wide">
+          What are you in the mood for?
+        </h1>
+        <p className="text-[#555] text-sm mb-10 text-center max-w-lg font-light">
+          Describe a feeling, a vibe, or what you want to watch
+        </p>
         <SearchBar large />
+        <div className="mt-6">
+          <MoodPills />
+        </div>
+        <button onClick={openChat} className="mt-4 text-xs text-[#555] hover:text-[#888] transition-colors">
+          or <span className="underline underline-offset-2">chat with AI matchmaker</span>
+        </button>
       </section>
-      <section className="py-8">
+
+      {/* Content */}
+      <section className="pb-12">
         {loading ? (
-          <div className="flex items-center justify-center py-20"><div className="animate-pulse text-gray-400 text-lg">Loading content...</div></div>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-pulse text-[#444]">Loading...</div>
+          </div>
         ) : (
           <>
-            <Carousel title="Trending This Week" items={trending} />
-            <Carousel title="Top Rated Movies" items={topMovies} />
-            <Carousel title="Top Rated TV Shows" items={topTV} />
+            {/* Mood Playlists */}
+            {playlists.length > 0 && (
+              <div className="mb-10">
+                <h2 className="text-label mb-4 px-6">MOOD PLAYLISTS</h2>
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide px-6 pb-2" style={{ scrollbarWidth: "none" }}>
+                  {playlists.map((pl) => (
+                    <PlaylistCard key={pl.mood_key || pl.id} moodKey={pl.mood_key || pl.id} name={pl.name} description={pl.description} items={pl.items} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Carousel title="TRENDING THIS WEEK" items={trending} />
+            <Carousel title="TOP RATED MOVIES" items={topMovies} />
+            <Carousel title="TOP RATED TV" items={topTV} />
           </>
         )}
       </section>
