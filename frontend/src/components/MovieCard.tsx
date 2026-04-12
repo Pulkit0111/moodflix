@@ -20,7 +20,7 @@ export default function MovieCard({ tmdbId, mediaType, title, posterPath, voteAv
       <div className="mt-2">
         <h3 className="text-white text-sm font-medium truncate group-hover:text-red-400 transition-colors">{title}</h3>
         {releaseYear && <p className="text-gray-500 text-xs">{releaseYear}</p>}
-        {matchReason && <p className="text-gray-400 text-xs mt-1 line-clamp-2">{matchReason}</p>}
+        {matchReason && <p className="text-gray-400 text-sm mt-1 line-clamp-3">{matchReason}</p>}
       </div>
     </Link>
   );
