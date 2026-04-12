@@ -57,11 +57,16 @@ async def generate_embeddings(movies: list[dict], tv_shows: list[dict], tmdb: TM
     for i in range(0, len(new_items), BATCH_SIZE):
         batch = new_items[i:i+BATCH_SIZE]
         texts, ids, metadatas = [], [], []
+        seen_in_batch = set()
         for media_type, item in batch:
+            doc_id = f"{media_type}_{item['id']}"
+            if doc_id in seen_in_batch:
+                continue
+            seen_in_batch.add(doc_id)
             title = item.get("title") or item.get("name", "Unknown")
             text = build_embedding_text_from_tmdb(item, genre_map, keywords=[], cast=[])
             texts.append(text)
-            ids.append(f"{media_type}_{item['id']}")
+            ids.append(doc_id)
             genre_names = [genre_map.get(gid, "") for gid in item.get("genre_ids", [])]
             genre_names = [g for g in genre_names if g]
             metadatas.append({
