@@ -18,9 +18,9 @@ function ratingColor(rating: number): string {
 export default function MovieCard({ tmdbId, mediaType, title, posterPath, voteAverage, releaseYear, matchReason, moodTags, pitch }: MovieCardProps) {
   const imageUrl = posterPath ? `${IMAGE_BASE}/w300${posterPath}` : null;
   return (
-    <Link href={`/title/${mediaType}/${tmdbId}`} className="group flex-shrink-0 w-44 relative z-0 hover:z-10">
-      <div className="transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-2">
-        <div className="relative overflow-hidden rounded-lg aspect-[2/3] bg-[#111] shadow-md group-hover:shadow-2xl group-hover:shadow-black/60 transition-shadow duration-300">
+    <Link href={`/title/${mediaType}/${tmdbId}`} className="group flex-shrink-0 w-44">
+      <div>
+        <div className="relative overflow-hidden rounded-lg aspect-[2/3] bg-[#111]">
           {imageUrl ? (
             <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
           ) : (
