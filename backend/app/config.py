@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     result_count: int = 10
     embedding_model: str = "text-embedding-3-small"
     rerank_model: str = "gpt-4o-mini"
+    chat_model: str = "gpt-4o-mini"
+    mood_classification_model: str = "gpt-4o-mini"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

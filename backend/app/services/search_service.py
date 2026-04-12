@@ -45,6 +45,8 @@ class SearchService:
             for i, doc_id in enumerate(results["ids"][0]):
                 metadata = results["metadatas"][0][i]
                 document = results["documents"][0][i] if results["documents"] else ""
+                mood_tags_str = metadata.get("mood_tags", "")
+                mood_tags = [t.strip() for t in mood_tags_str.split(",") if t.strip()] if mood_tags_str else []
                 candidates.append({
                     "tmdb_id": metadata["tmdb_id"],
                     "media_type": metadata["media_type"],
@@ -54,16 +56,19 @@ class SearchService:
                     "vote_average": metadata.get("vote_average", 0),
                     "popularity": metadata.get("popularity", 0),
                     "poster_path": metadata.get("poster_path"),
+                    "mood_tags": mood_tags,
                     "document": document,
                 })
         return candidates
 
-    async def rerank(self, query: str, candidates: list[dict], user_context: str = "") -> list[dict]:
+    async def rerank(self, query: str, candidates: list[dict], user_context: str = "", filter_text: str = "") -> list[dict]:
         candidates_text = "\n".join(
             f"- [tmdb_id={c['tmdb_id']}] {c['title']} ({c.get('release_year', 'N/A')}): {c['document'][:200]}"
             for c in candidates
         )
         personalization = f"User context: {user_context}" if user_context else ""
+        if filter_text:
+            personalization += f"\nAdditional filters: {filter_text}. Only include results that satisfy these filters."
         response = await self.openai_client.chat.completions.create(
             model=self.rerank_model,
             messages=[
@@ -99,12 +104,13 @@ class SearchService:
                     "poster_path": candidate.get("poster_path"),
                     "vote_average": candidate.get("vote_average", 0),
                     "release_year": candidate.get("release_year"),
+                    "mood_tags": candidate.get("mood_tags", []),
                     "match_reason": item.get("match_reason", ""),
                 })
         return results
 
-    async def search(self, query: str, user_context: str = "") -> list[dict]:
+    async def search(self, query: str, user_context: str = "", filter_text: str = "") -> list[dict]:
         candidates = await self.retrieve_candidates(query)
         if not candidates:
             return []
-        return await self.rerank(query, candidates, user_context)
+        return await self.rerank(query, candidates, user_context, filter_text)

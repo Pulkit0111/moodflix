@@ -49,7 +49,7 @@ async def search(
     user_service: UserService = Depends(get_user_service),
 ):
     user_context = _build_user_context(user_service, user["uid"])
-    results = await search_service.search(request.query, user_context)
+    results = await search_service.search(request.query, user_context, request.filter_text or "")
     try:
         user_service.add_search_query(user["uid"], request.query)
     except Exception as e:

@@ -25,3 +25,4 @@ class MediaSummary(BaseModel):
     poster_path: str | None = None
     vote_average: float = 0.0
     release_year: int | None = None
+    mood_tags: list[str] = []

@@ -30,10 +30,13 @@ def get_similar_from_chroma(media_type: str, tmdb_id: int, n: int = 10) -> list[
             if rid == doc_id:
                 continue
             meta = results["metadatas"][0][i]
+            tags_str = meta.get("mood_tags", "")
+            mood_tags = [t.strip() for t in tags_str.split(",") if t.strip()] if tags_str else []
             similar.append({
                 "tmdb_id": meta["tmdb_id"], "media_type": meta["media_type"],
                 "title": meta["title"], "poster_path": meta.get("poster_path"),
                 "vote_average": meta.get("vote_average", 0), "release_year": meta.get("release_year"),
+                "mood_tags": mood_tags,
             })
             if len(similar) >= n:
                 break
@@ -42,10 +45,22 @@ def get_similar_from_chroma(media_type: str, tmdb_id: int, n: int = 10) -> list[
 @router.get("/title/{media_type}/{tmdb_id}")
 async def get_details(media_type: str, tmdb_id: int, tmdb: TMDBService = Depends(get_tmdb_service)):
     try:
-        return await tmdb.get_details(media_type, tmdb_id)
+        data = await tmdb.get_details(media_type, tmdb_id)
     except (httpx.HTTPStatusError, httpx.ConnectError) as e:
         logger.error("TMDB API error on /title/%s/%s: %s", media_type, tmdb_id, e)
         raise HTTPException(status_code=502, detail="Failed to fetch title details from TMDB")
+    try:
+        collection = get_chroma_collection()
+        doc_id = f"{media_type}_{tmdb_id}"
+        existing = collection.get(ids=[doc_id], include=["metadatas"])
+        if existing["ids"]:
+            tags_str = existing["metadatas"][0].get("mood_tags", "")
+            data["mood_tags"] = [t.strip() for t in tags_str.split(",") if t.strip()] if tags_str else []
+        else:
+            data["mood_tags"] = []
+    except Exception:
+        data["mood_tags"] = []
+    return data
 
 @router.get("/title/{media_type}/{tmdb_id}/similar")
 async def get_similar(media_type: str, tmdb_id: int):
