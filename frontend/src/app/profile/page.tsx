@@ -101,11 +101,11 @@ export default function ProfilePage() {
                 {watchlist.map((item) => (
                   <div key={item.tmdb_id} className="relative group">
                     <MovieCard tmdbId={item.tmdb_id} mediaType={item.media_type} title={item.title} posterPath={item.poster_path} />
-                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-[40%] left-0 right-0 z-20 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
                       <button onClick={(e) => { e.preventDefault(); handleMarkWatched(item); }}
-                        className="bg-black/70 text-[#888] hover:text-white text-[10px] px-2 py-1 rounded-full">Watched</button>
+                        className="bg-white text-black text-xs font-medium px-3 py-1.5 rounded-full shadow-lg hover:bg-gray-200 transition-colors active:scale-95">Watched</button>
                       <button onClick={(e) => { e.preventDefault(); handleRemoveFromWatchlist(item.tmdb_id); }}
-                        className="bg-black/70 text-[#888] hover:text-white w-6 h-6 rounded-full text-xs flex items-center justify-center">&times;</button>
+                        className="bg-red-500/90 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors active:scale-95">Remove</button>
                     </div>
                   </div>
                 ))}
@@ -118,8 +118,10 @@ export default function ProfilePage() {
                   <div key={item.tmdb_id} className="relative group">
                     <MovieCard tmdbId={item.tmdb_id} mediaType={item.media_type} title={item.title} posterPath={null} />
                     {item.rating && <p className="text-[#888] text-xs mt-1">Rated: {item.rating}/5</p>}
-                    <button onClick={(e) => { e.preventDefault(); handleRemoveFromHistory(item.tmdb_id); }}
-                      className="absolute top-2 right-2 bg-black/70 text-[#888] hover:text-white w-6 h-6 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">&times;</button>
+                    <div className="absolute bottom-[40%] left-0 right-0 z-20 flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      <button onClick={(e) => { e.preventDefault(); handleRemoveFromHistory(item.tmdb_id); }}
+                        className="bg-red-500/90 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors active:scale-95">Remove</button>
+                    </div>
                   </div>
                 ))}
                 {history.length === 0 && <p className="text-[#555] col-span-full text-center py-10 text-sm font-light">No watch history yet</p>}
