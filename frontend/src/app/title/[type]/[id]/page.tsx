@@ -37,7 +37,16 @@ export default function DetailPage() {
     getPitch(mediaType, tmdbId).then((res) => setPitch(res.pitch)).catch(() => {});
   }, [user, detail, mediaType, tmdbId]);
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-pulse text-[#444]">Loading...</div></div>;
+  if (loading) return (
+    <div>
+      <div className="h-[60vh] bg-[#0f0f0f] animate-pulse" />
+      <div className="max-w-7xl mx-auto px-6 py-10 space-y-4">
+        <div className="h-5 bg-[#161616] rounded w-64 animate-pulse" />
+        <div className="h-3 bg-[#161616] rounded w-full max-w-xl animate-pulse" />
+        <div className="h-3 bg-[#161616] rounded w-full max-w-lg animate-pulse" />
+      </div>
+    </div>
+  );
   if (!detail) return <div className="flex items-center justify-center min-h-screen"><p className="text-[#555]">Title not found</p></div>;
 
   const title = detail.title || detail.name;

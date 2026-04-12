@@ -94,7 +94,19 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        {loading ? <div className="animate-pulse text-[#444] py-10 text-center">Loading...</div> : (
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="rounded-lg aspect-[2/3] bg-[#161616]" />
+                <div className="mt-2.5 space-y-1.5">
+                  <div className="h-3 bg-[#161616] rounded w-3/4" />
+                  <div className="h-2.5 bg-[#161616] rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
           <>
             {activeTab === "watchlist" && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">

@@ -29,9 +29,19 @@ function SearchContent() {
         <div className="mb-6"><SearchBar initialQuery={query} /></div>
         <SmartFilter onFilter={handleFilter} />
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="animate-pulse text-[#555] mb-2">Searching for your vibe...</div>
-            <p className="text-[#444] text-xs">Analyzing mood and finding matches</p>
+          <div>
+            <div className="h-3 bg-[#161616] rounded w-48 mb-6 animate-pulse" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="rounded-lg aspect-[2/3] bg-[#161616]" />
+                  <div className="mt-2.5 space-y-1.5">
+                    <div className="h-3 bg-[#161616] rounded w-3/4" />
+                    <div className="h-2.5 bg-[#161616] rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {error && <div className="text-center py-20"><p className="text-[#666]">{error}</p></div>}

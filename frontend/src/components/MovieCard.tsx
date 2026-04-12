@@ -1,11 +1,10 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 
 interface MovieCardProps {
   tmdbId: number; mediaType: string; title: string; posterPath: string | null;
   voteAverage?: number; releaseYear?: number | null; matchReason?: string;
-  moodTags?: string[]; pitch?: string; zoomOnHover?: boolean;
+  moodTags?: string[]; pitch?: string;
 }
 
 const IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE || "https://image.tmdb.org/t/p";
@@ -16,33 +15,15 @@ function ratingColor(rating: number): string {
   return "text-[#999]";
 }
 
-export default function MovieCard({ tmdbId, mediaType, title, posterPath, voteAverage, releaseYear, matchReason, moodTags, pitch, zoomOnHover = false }: MovieCardProps) {
+export default function MovieCard({ tmdbId, mediaType, title, posterPath, voteAverage, releaseYear, matchReason, moodTags, pitch }: MovieCardProps) {
   const imageUrl = posterPath ? `${IMAGE_BASE}/w300${posterPath}` : null;
-  const [zoomed, setZoomed] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleMouseEnter = useCallback(() => {
-    if (!zoomOnHover) return;
-    timerRef.current = setTimeout(() => setZoomed(true), 400);
-  }, [zoomOnHover]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (!zoomOnHover) return;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setZoomed(false);
-  }, [zoomOnHover]);
 
   return (
-    <Link
-      href={`/title/${mediaType}/${tmdbId}`}
-      className={`group flex-shrink-0 w-44 relative ${zoomed ? "z-20" : "z-0"}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className={`transition-transform duration-300 ease-out origin-center ${zoomed ? "scale-[1.15] -translate-y-3" : ""}`}>
-        <div className={`relative overflow-hidden rounded-lg aspect-[2/3] bg-[#111] transition-shadow duration-300 ${zoomed ? "shadow-2xl shadow-black/80" : ""}`}>
+    <Link href={`/title/${mediaType}/${tmdbId}`} className="group flex-shrink-0 w-44">
+      <div>
+        <div className="relative overflow-hidden rounded-lg aspect-[2/3] bg-[#111]">
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
+            <img src={imageUrl} alt={title} className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-[#444] text-xs p-3 text-center font-light">{title}</div>
           )}
