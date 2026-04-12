@@ -22,14 +22,14 @@ export default function Carousel({ title, items }: CarouselProps) {
       <h2 className="text-label mb-4 px-6">{title}</h2>
       <div className="relative group">
         <button onClick={() => scroll("left")} className="absolute left-0 top-0 bottom-8 z-10 w-10 text-[#444] hover:text-white opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-lg">&#8249;</button>
-        <div ref={scrollRef} className="flex gap-5 overflow-x-auto scrollbar-hide px-6 pb-2" style={{ scrollbarWidth: "none" }}>
+        <div ref={scrollRef} className="flex gap-5 overflow-x-auto overflow-y-visible scrollbar-hide px-6 py-4" style={{ scrollbarWidth: "none" }}>
           {items.map((item) => {
             const id = item.tmdb_id || item.id || 0;
             const mediaType = item.media_type || (item.title ? "movie" : "tv");
             const name = item.title || item.name || "Unknown";
             const dateStr = item.release_date || item.first_air_date || "";
             const year = dateStr ? parseInt(dateStr.substring(0, 4)) : null;
-            return <MovieCard key={`${mediaType}-${id}`} tmdbId={id} mediaType={mediaType} title={name} posterPath={item.poster_path || null} voteAverage={item.vote_average} releaseYear={year} moodTags={item.mood_tags} />;
+            return <MovieCard key={`${mediaType}-${id}`} tmdbId={id} mediaType={mediaType} title={name} posterPath={item.poster_path || null} voteAverage={item.vote_average} releaseYear={year} moodTags={item.mood_tags} zoomOnHover />;
           })}
         </div>
         <button onClick={() => scroll("right")} className="absolute right-0 top-0 bottom-8 z-10 w-10 text-[#444] hover:text-white opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-lg">&#8250;</button>
