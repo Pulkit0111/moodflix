@@ -23,7 +23,8 @@ async def lifespan(app: FastAPI):
         init_firebase()
         logger.info("Firebase initialized")
     except Exception as e:
-        logger.warning("Firebase init skipped: %s", e)
+        logger.error("Firebase init FAILED: %s", e)
+        raise
     from app.workers.tmdb_sync import run_sync
     scheduler.add_job(run_sync, "cron", hour=3, id="tmdb_sync", max_instances=1, coalesce=True, misfire_grace_time=3600)
     scheduler.start()
