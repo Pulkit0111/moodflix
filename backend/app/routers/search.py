@@ -59,4 +59,4 @@ async def search(
         user_service.add_search_query(user["uid"], body.query)
     except Exception as e:
         logger.warning("Failed to save search query to Firestore: %s", e)
-    return SearchResponse(query=request.query, results=[SearchResult(**r) for r in results])
+    return SearchResponse(query=body.query, results=[SearchResult(**r) for r in results])
