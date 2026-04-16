@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     firebase_service_account_path: str = ""
     firebase_service_account_json: str = ""  # base64-encoded JSON for production
     chroma_persist_dir: str = "./data/chroma_db"
+    chroma_api_key: str = ""
+    chroma_tenant: str = ""
+    chroma_database: str = "default_database"
     tmdb_base_url: str = "https://api.themoviedb.org/3"
     frontend_url: str = "http://localhost:3000"
 
