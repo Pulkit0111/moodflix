@@ -51,10 +51,15 @@ def init_firebase():
     if not _firebase_initialized:
         from app.config import settings
         if settings.firebase_service_account_json:
-            service_account_dict = json.loads(base64.b64decode(settings.firebase_service_account_json))
+            raw = settings.firebase_service_account_json.strip().replace("\n", "").replace("\r", "").replace(" ", "")
+            logger.info("Firebase: decoding base64 (length=%d, starts=%s)", len(raw), raw[:20])
+            service_account_dict = json.loads(base64.b64decode(raw))
+            logger.info("Firebase: project_id=%s", service_account_dict.get("project_id"))
             cred = firebase_admin.credentials.Certificate(service_account_dict)
-        else:
+        elif settings.firebase_service_account_path:
             cred = firebase_admin.credentials.Certificate(settings.firebase_service_account_path)
+        else:
+            raise RuntimeError("No Firebase credentials configured: set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH")
         firebase_admin.initialize_app(cred)
         _firebase_initialized = True
 
