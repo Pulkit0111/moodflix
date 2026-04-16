@@ -1,7 +1,9 @@
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from openai import AsyncOpenAI
 
 from app.config import settings
@@ -13,6 +15,7 @@ from app.services.embedding_service import EmbeddingService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["chat"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 def _get_chat_service() -> ChatService:
@@ -49,10 +52,11 @@ def _build_user_context(uid: str) -> str:
 
 
 @router.post("/chat")
-async def chat(request: ChatRequest, user: dict = Depends(verify_firebase_token)):
+@limiter.limit("30/hour")
+async def chat(request: Request, body: ChatRequest, user: dict = Depends(verify_firebase_token)):
     service = _get_chat_service()
     user_context = _build_user_context(user["uid"])
-    messages = [{"role": m.role, "content": m.content} for m in request.messages]
+    messages = [{"role": m.role, "content": m.content} for m in body.messages]
 
     async def event_stream():
         async for chunk in service.stream_chat(messages, user_context):

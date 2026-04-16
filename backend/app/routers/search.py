@@ -1,6 +1,8 @@
 import logging
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.dependencies import verify_firebase_token, get_chroma_collection
 from app.models.search import SearchRequest, SearchResponse, SearchResult
 from app.services.search_service import SearchService
@@ -10,6 +12,7 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["search"])
+limiter = Limiter(key_func=get_remote_address)
 
 def get_search_service() -> SearchService:
     embedding_service = EmbeddingService(api_key=settings.openai_api_key, model=settings.embedding_model)
@@ -42,16 +45,18 @@ def _build_user_context(user_service: UserService, uid: str) -> str:
     return ". ".join(parts)
 
 @router.post("/search", response_model=SearchResponse)
+@limiter.limit("20/hour")
 async def search(
-    request: SearchRequest,
+    request: Request,
+    body: SearchRequest,
     user: dict = Depends(verify_firebase_token),
     search_service: SearchService = Depends(get_search_service),
     user_service: UserService = Depends(get_user_service),
 ):
     user_context = _build_user_context(user_service, user["uid"])
-    results = await search_service.search(request.query, user_context, request.filter_text or "")
+    results = await search_service.search(body.query, user_context, body.filter_text or "")
     try:
-        user_service.add_search_query(user["uid"], request.query)
+        user_service.add_search_query(user["uid"], body.query)
     except Exception as e:
         logger.warning("Failed to save search query to Firestore: %s", e)
     return SearchResponse(query=request.query, results=[SearchResult(**r) for r in results])

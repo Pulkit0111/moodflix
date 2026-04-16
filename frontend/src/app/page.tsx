@@ -59,8 +59,8 @@ export default function Home() {
             {Array.from({ length: 3 }).map((_, s) => (
               <div key={s} className="mb-10">
                 <div className="h-3 bg-[#161616] rounded w-32 mb-4 mx-6 animate-pulse" />
-                <div className="flex gap-5 px-6">
-                  {Array.from({ length: 7 }).map((_, i) => <SkeletonCard key={i} />)}
+                <div className="flex gap-5 px-6 overflow-hidden">
+                  {Array.from({ length: 15 }).map((_, i) => <SkeletonCard key={i} />)}
                 </div>
               </div>
             ))}
