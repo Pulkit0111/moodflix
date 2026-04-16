@@ -1,10 +1,13 @@
 import base64
 import json
+import logging
 import chromadb
 from chromadb.api.models.Collection import Collection
 from fastapi import Header, HTTPException
 from firebase_admin import auth as firebase_auth
 import firebase_admin
+
+logger = logging.getLogger(__name__)
 
 _chroma_client: chromadb.ClientAPI | None = None
 _collection: Collection | None = None
@@ -57,10 +60,14 @@ def init_firebase():
 
 async def verify_firebase_token(authorization: str | None = Header(default=None)) -> dict:
     if not authorization or not authorization.startswith("Bearer "):
+        logger.warning("AUTH: No Authorization header present")
         raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
     token = authorization.split("Bearer ")[1]
+    logger.info("AUTH: Token received, length=%d, starts=%s", len(token), token[:20])
     try:
         decoded = firebase_auth.verify_id_token(token)
+        logger.info("AUTH: Token verified for uid=%s", decoded.get("uid"))
         return decoded
-    except Exception:
+    except Exception as e:
+        logger.error("AUTH: Token verification failed: %s", e)
         raise HTTPException(status_code=401, detail="Invalid or expired token")
