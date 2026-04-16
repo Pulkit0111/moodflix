@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning("Firebase init skipped: %s", e)
     from app.workers.tmdb_sync import run_sync
-    scheduler.add_job(run_sync, "cron", hour=3, id="tmdb_sync")
+    scheduler.add_job(run_sync, "cron", hour=3, id="tmdb_sync", max_instances=1, coalesce=True, misfire_grace_time=3600)
     scheduler.start()
     logger.info("Scheduler started")
     yield
@@ -31,7 +31,7 @@ app = FastAPI(title="MoodFlix API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

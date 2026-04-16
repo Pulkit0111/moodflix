@@ -20,7 +20,19 @@ export default function Navbar() {
                   <Link href="/profile" className="text-sm text-[#a0a0a0] hover:text-white transition-colors">My List</Link>
                   <button onClick={openChat} className="text-sm text-white bg-gradient-to-r from-[#333] to-[#222] px-4 py-1.5 rounded-full hover:from-[#444] hover:to-[#333] transition-all border border-[#444]">&#10022; AI Chat</button>
                   <button onClick={() => signOut()} className="text-xs text-[#666] hover:text-white transition-colors">Sign Out</button>
-                  {user.photoURL && <img src={user.photoURL} alt={user.displayName || "User"} className="w-7 h-7 rounded-full opacity-80 hover:opacity-100 transition-opacity" />}
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || "User"}
+                      className="w-7 h-7 rounded-full object-cover opacity-80 hover:opacity-100 transition-opacity"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-[#333] flex items-center justify-center text-xs text-white opacity-80">
+                      {(user.displayName || user.email || "U")[0].toUpperCase()}
+                    </div>
+                  )}
                 </>
               ) : (
                 <button onClick={() => signInWithGoogle()} className="text-sm text-white border border-[#333] px-4 py-2 rounded-full hover:bg-white/5 transition-all active:scale-95">Sign In</button>

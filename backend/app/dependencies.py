@@ -1,3 +1,5 @@
+import base64
+import json
 import chromadb
 from chromadb.api.models.Collection import Collection
 from fastapi import Header, HTTPException
@@ -38,7 +40,11 @@ def init_firebase():
     global _firebase_initialized
     if not _firebase_initialized:
         from app.config import settings
-        cred = firebase_admin.credentials.Certificate(settings.firebase_service_account_path)
+        if settings.firebase_service_account_json:
+            service_account_dict = json.loads(base64.b64decode(settings.firebase_service_account_json))
+            cred = firebase_admin.credentials.Certificate(service_account_dict)
+        else:
+            cred = firebase_admin.credentials.Certificate(settings.firebase_service_account_path)
         firebase_admin.initialize_app(cred)
         _firebase_initialized = True
 
