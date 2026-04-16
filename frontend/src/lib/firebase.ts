@@ -28,13 +28,9 @@ export async function signOut() {
 }
 export async function getIdToken(): Promise<string | null> {
   if (!auth) return null;
-  if (auth.currentUser) return auth.currentUser.getIdToken();
-  return new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe();
-      if (user) user.getIdToken().then(resolve).catch(() => resolve(null));
-      else resolve(null);
-    });
-  });
+  await auth.authStateReady();
+  const user = auth.currentUser;
+  if (!user) return null;
+  return user.getIdToken().catch(() => null);
 }
 export { auth, onAuthStateChanged, type User };
