@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     openai_api_key: str
     firebase_service_account_path: str = ""
     firebase_service_account_json: str = ""  # base64-encoded JSON for production
+    admin_secret: str = ""
     chroma_persist_dir: str = "./data/chroma_db"
     chroma_api_key: str = ""
     chroma_tenant: str = ""

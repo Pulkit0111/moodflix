@@ -1,6 +1,6 @@
 import json
 import os
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, Header, HTTPException
 from app.dependencies import verify_firebase_token
 from app.config import settings
 
@@ -27,7 +27,9 @@ async def sync_status(user: dict = Depends(verify_firebase_token)):
     return {**state, "collection_count": collection_count}
 
 @router.post("/sync/run")
-async def trigger_sync(background_tasks: BackgroundTasks, user: dict = Depends(verify_firebase_token)):
+async def trigger_sync(background_tasks: BackgroundTasks, x_admin_secret: str | None = Header(default=None)):
+    if not settings.admin_secret or x_admin_secret != settings.admin_secret:
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
     from app.workers.tmdb_sync import run_sync
     background_tasks.add_task(run_sync)
     return {"status": "sync_started"}
