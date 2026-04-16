@@ -21,12 +21,10 @@ def get_chroma_collection(persist_dir: str | None = None) -> Collection:
         from app.config import settings
         if _chroma_client is None:
             if settings.chroma_api_key:
-                _chroma_client = chromadb.HttpClient(
-                    ssl=True,
-                    host="api.trychroma.com",
+                _chroma_client = chromadb.CloudClient(
+                    api_key=settings.chroma_api_key,
                     tenant=settings.chroma_tenant,
                     database=settings.chroma_database,
-                    headers={"X-Chroma-Token": settings.chroma_api_key},
                 )
             else:
                 _chroma_client = chromadb.PersistentClient(path=settings.chroma_persist_dir)
